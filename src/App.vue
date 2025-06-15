@@ -8,7 +8,8 @@
         <MyDialog v-model:show="dialogVisible">
             <PostForm @create="createPost" />
         </MyDialog>
-        <PostList :posts="posts" @remove="removePost" />
+        <PostList :posts="posts" @remove="removePost" v-if="!isPostLoading" />
+        <div v-else>Идёт загрузка...</div>
     </div>
 </template>
 
@@ -27,6 +28,7 @@ export default {
             posts: [],
             dialogVisible: false,
             modificatorValue: "",
+            isPostLoading: false,
         }
     },
     methods: {
@@ -45,13 +47,18 @@ export default {
         },
         async fetchPost() {
             try {
+                this.isPostLoading = true;
                 const response = await axios.get("https://jsonplaceholder.typicode.com/posts?_limit=10");
                 this.posts = response.data;
-                console.log(response)
             } catch (error) {
                 alert("Error")
+            } finally {
+                this.isPostLoading = false;
             }
         }
+    },
+    mounted() {
+        this.fetchPost()
     }
 }
 </script>
