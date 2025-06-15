@@ -1,30 +1,74 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+    <div class="app">
+        <h1>Страница с постами</h1>
+        <input type="text" v-model.trim="modificatorValue">
+        <MyButton @click="showDialog" style="margin: 15px 0;">
+            Создать пост
+        </MyButton>
+        <MyDialog v-model:show="dialogVisible">
+            <PostForm @create="createPost" />
+        </MyDialog>
+        <PostList :posts="posts" @remove="removePost" />
+    </div>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+<script>
+import axios from 'axios';
+import PostForm from './components/PostForm.vue';
+import PostList from './components/PostList.vue';
+import MyButton from './components/UI/MyButton.vue';
+import MyDialog from './components/UI/MyDialog.vue';
+export default {
+    components: {
+        PostList, PostForm
+    },
+    data() {
+        return {
+            posts: [],
+            dialogVisible: false,
+            modificatorValue: "",
+        }
+    },
+    methods: {
+        createPost(post) {
+            this.posts.push(post);
+            this.dialogVisible = false;
+        },
+        inputTitle(event) {
+            this.title = event.target.value;
+        },
+        removePost(post) {
+            this.posts = this.posts.filter(p => p.id !== post.id)
+        },
+        showDialog() {
+            this.dialogVisible = true
+        },
+        async fetchPost() {
+            try {
+                const response = await axios.get("https://jsonplaceholder.typicode.com/posts?_limit=10");
+                this.posts = response.data;
+                console.log(response)
+            } catch (error) {
+                alert("Error")
+            }
+        }
+    }
+}
+</script>
+
+<style scoped>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-nav {
-  padding: 30px;
+.app {
+    padding: 20px;
 }
 
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
+.form {
+    display: flex;
+    flex-direction: column;
 }
 </style>
