@@ -1,14 +1,17 @@
 <template>
     <div class="app">
         <h1>Страница с постами</h1>
+        <div class="app__btns">
+            <MyButton @click="showDialog">
+                Создать пост
+            </MyButton>
+            <MySelecte v-model="selectedSort" :options="sortOptions" />
+        </div>
         <input type="text" v-model.trim="modificatorValue">
-        <MyButton @click="showDialog" style="margin: 15px 0;">
-            Создать пост
-        </MyButton>
         <MyDialog v-model:show="dialogVisible">
             <PostForm @create="createPost" />
         </MyDialog>
-        <PostList :posts="posts" @remove="removePost" v-if="!isPostLoading" />
+        <PostList :posts="sortedPosts" @remove="removePost" v-if="!isPostLoading" />
         <div v-else>Идёт загрузка...</div>
     </div>
 </template>
@@ -19,6 +22,7 @@ import PostForm from './components/PostForm.vue';
 import PostList from './components/PostList.vue';
 import MyButton from './components/UI/MyButton.vue';
 import MyDialog from './components/UI/MyDialog.vue';
+import MySelecte from './components/UI/MySelecte.vue';
 export default {
     components: {
         PostList, PostForm
@@ -29,6 +33,11 @@ export default {
             dialogVisible: false,
             modificatorValue: "",
             isPostLoading: false,
+            selectedSort: "",
+            sortOptions: [
+                { value: "title", name: "По названию" },
+                { value: "body", name: "По содержимому" }
+            ]
         }
     },
     methods: {
@@ -59,7 +68,19 @@ export default {
     },
     mounted() {
         this.fetchPost()
-    }
+    },
+    computed: {
+        sortedPosts() {
+            return [...this.posts].sort((post1, post2) => {
+                return post1[this.selectedSort]?.localeCompare(post2[this.selectedSort])
+            })
+        }
+    },
+    // watch: {
+    //     selectedSort(newValue) {
+    //         this.posts.sort          
+    //     }
+    // }
 }
 </script>
 
@@ -77,5 +98,11 @@ export default {
 .form {
     display: flex;
     flex-direction: column;
+}
+
+.app__btns {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
 }
 </style>
